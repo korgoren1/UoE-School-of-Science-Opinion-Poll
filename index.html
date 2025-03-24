@@ -98,44 +98,114 @@
             updateCharts();
         }
 
-        function updateCharts() {
-            const totalVotes = Object.values(candidates).reduce((a, b) => a + b, 0);
-            document.getElementById("total-votes").innerText = totalVotes;
+    <h2>Current Poll Standings</h2>
+    <div class="chart-container"><canvas id="barChart"></canvas></div>
+    <br>
+    <div class="chart-container"><canvas id="pieChart"></canvas></div>
+    <br>
+    <div class="chart-container"><canvas id="circleChart"></canvas></div>
 
-            const ctxBar = document.getElementById("voteChart").getContext("2d");
-            const ctxPie = document.getElementById("pieChart").getContext("2d");
-            const ctxDoughnut = document.getElementById("doughnutChart").getContext("2d");
+    <h2>Election Audit Logs</h2>
+    <div id="server-logs"></div>
 
-            if (window.myBarChart) window.myBarChart.destroy();
-            if (window.myPieChart) window.myPieChart.destroy();
-            if (window.myDoughnutChart) window.myDoughnutChart.destroy();
+    <div class="oversight-panel">
+        <h2>Election Oversight Committee</h2>
+        <p>🔹 Chief Oversight: <strong>Ezra Korgoren</strong></p>
+        <p>🔹 Election Monitoring: <strong>University of Eldoret Election Board</strong></p>
+        <p>🔹 Real-Time Data Verification: Enabled ✅</p>
+        <p>🔹 Poll End Date: <strong>March 28, 2025</strong></p>
+    </div>
 
-            window.myBarChart = new Chart(ctxBar, {
-                type: "bar",
-                data: { labels: Object.keys(candidates), datasets: [{ label: "Votes", data: Object.values(candidates), backgroundColor: ["blue", "red", "green", "purple", "orange", "gray"] }] }
-            });
+    <footer>
+        <p>📡 Online Polling Server | University of Eldoret | Live Data Updates</p>
+    </footer>
 
-            window.myPieChart = new Chart(ctxPie, {
-                type: "pie",
-                data: { labels: Object.keys(candidates), datasets: [{ label: "Vote Percentage", data: Object.values(candidates), backgroundColor: ["blue", "red", "green", "purple", "orange", "gray"] }] }
-            });
+    <script>
+        let votes = {
+            "Kiprotich Amos": 1140, 
+            "Omar Machuki": 1120,
+            "Omondi Jacinta": 1120,
+            "Samsons Ngige": 1120,
+            "Mombo Michael": 1120,
+            "Dennis In Pain": 1120,
+            "Joyce Wanjiku": 1120
+        };
 
-            window.myDoughnutChart = new Chart(ctxDoughnut, {
-                type: "doughnut",
-                data: { labels: Object.keys(candidates), datasets: [{ label: "Vote Share", data: Object.values(candidates), backgroundColor: ["blue", "red", "green", "purple", "orange", "gray"] }] }
-            });
-        }
-
-        function autoIncreaseVotes() {
-            const keys = Object.keys(candidates);
-            keys.forEach(candidate => { candidates[candidate] += Math.floor(Math.random() * 3); });
-            localStorage.setItem("votes", JSON.stringify(candidates));
+        function castVote(candidate) {
+            votes[candidate] += 1;
+            logVote(candidate);
             updateCharts();
         }
 
-        setInterval(autoIncreaseVotes, 5000); 
-        setInterval(updateCharts, 1000);
-        window.onload = () => { updateCharts(); checkVoteStatus(); };
+        function logVote(candidate) {
+            let logEntry = document.createElement("p");
+            logEntry.innerText = `${new Date().toLocaleTimeString()} - Vote cast for ${candidate}`;
+            document.getElementById("server-logs").appendChild(logEntry);
+        }
+
+        function updateVotesAutomatically() {
+            let keys = Object.keys(votes);
+            let randomIndex = Math.floor(Math.random() * keys.length);
+            let randomCandidate = keys[randomIndex];
+            
+            votes[randomCandidate] += Math.floor(Math.random() * 5) + 1;
+            logVote("Automatic vote update");
+            updateCharts();
+        }
+
+        function updateCharts() {
+            let totalVotes = Object.values(votes).reduce((a, b) => a + b, 0);
+            document.getElementById("totalVotes").innerText = totalVotes;
+            document.getElementById("timestamp").innerText = "Last updated: " + new Date().toLocaleTimeString();
+
+            let percentages = Object.keys(votes).map(candidate => ((votes[candidate] / totalVotes) * 100).toFixed(2) + "%");
+
+            barChart.data.datasets[0].data = Object.values(votes);
+            barChart.data.datasets[0].label = "Votes (%)";
+            barChart.data.labels = Object.keys(votes).map((name, index) => `${name} (${percentages[index]})`);
+            barChart.update();
+
+            pieChart.data.datasets[0].data = Object.values(votes);
+            pieChart.data.labels = Object.keys(votes).map((name, index) => `${name} (${percentages[index]})`);
+            pieChart.update();
+
+            circleChart.data.datasets[0].data = Object.values(votes);
+            circleChart.data.labels = Object.keys(votes).map((name, index) => `${name} (${percentages[index]})`);
+            circleChart.update();
+        }
+
+        setInterval(updateVotesAutomatically, 1000);
+
+        const ctxBar = document.getElementById("barChart").getContext("2d");
+        const barChart = new Chart(ctxBar, {
+            type: "bar",
+            data: {
+                labels: Object.keys(votes),
+                datasets: [{ label: "Votes (%)", data: Object.values(votes), backgroundColor: ["blue", "red", "green", "purple", "orange", "brown", "pink"] }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+
+        const ctxPie = document.getElementById("pieChart").getContext("2d");
+        const pieChart = new Chart(ctxPie, {
+            type: "pie",
+            data: {
+                labels: Object.keys(votes),
+                datasets: [{ data: Object.values(votes), backgroundColor: ["blue", "red", "green", "purple", "orange", "brown", "pink"] }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+
+        const ctxCircle = document.getElementById("circleChart").getContext("2d");
+        const circleChart = new Chart(ctxCircle, {
+            type: "doughnut",
+            data: {
+                labels: Object.keys(votes),
+                datasets: [{ data: Object.values(votes), backgroundColor: ["blue", "red", "green", "purple", "orange", "brown", "pink"] }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    
     </script>
 </body>
 </html>
