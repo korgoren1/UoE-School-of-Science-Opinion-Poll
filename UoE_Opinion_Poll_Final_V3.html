@@ -1,0 +1,141 @@
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UoE Opinion Poll</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f4; margin: 0; padding: 0; }
+        header { background-color: #007bff; color: white; padding: 20px; }
+        .leader-banner { background-color: #ffcc00; padding: 10px; font-size: 18px; margin-top: 10px; }
+        .mobilization-message { background-color: #ff5733; color: white; padding: 10px; font-size: 16px; margin-top: 10px; }
+        .vote-section { margin: 20px; }
+        button { background-color: #28a745; color: white; padding: 10px; border: none; cursor: pointer; margin-top: 10px; }
+        button:disabled { background-color: gray; cursor: not-allowed; }
+        .results-section, .server-log { margin-top: 30px; }
+        .oversight-section { background-color: #e0e0e0; padding: 20px; margin-top: 20px; }
+        canvas { width: 80% !important; max-width: 600px; }
+        footer { background-color: #222; color: white; padding: 10px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>UoE School of Science Opinion Poll</h1>
+        <p>Vote for your preferred candidate! 🗳️</p>
+        <div class="leader-banner"><strong>🔥 Kiprotich Amos leads by 5%! 🔥</strong></div>
+        <div class="mobilization-message">🏆 **Support Amos Kiprotich!** 🏆<br> Cast your vote now and join the winning team on **March 28**! 🎉</div>
+    </header>
+    <main>
+        <div class="vote-section">
+            <h2>Cast Your Vote</h2>
+            <select id="candidate-select">
+                <option value="KIPROTICH AMOS">KIPROTICH AMOS</option>
+                <option value="OMAR MACHUKI">OMAR MACHUKI</option>
+                <option value="OMONDI JACINTA">OMONDI JACINTA</option>
+                <option value="SAMSONS GIGE">SAMSONS GIGE</option>
+                <option value="MOMBO MICHAEL">MOMBO MICHAEL</option>
+                <option value="DENNIS IN PAIN">DENNIS IN PAIN</option>
+            </select>
+            <button id="vote-button" onclick="submitVote()">Vote</button>
+            <p id="vote-message" style="color: red; display: none;">You have already voted! You cannot vote again.</p>
+        </div>
+        <div class="results-section">
+            <h2>Live Results (Updating Every Second)</h2>
+            <h3>Total Votes: <span id="total-votes">0</span></h3>
+            <canvas id="voteChart"></canvas>
+            <canvas id="pieChart"></canvas>
+            <canvas id="doughnutChart"></canvas>
+        </div>
+        <div class="server-log">
+            <h2>📜 Professional Server Logs</h2>
+            <ul id="log-list"></ul>
+        </div>
+        <div class="oversight-section">
+            <h2>🔍 Professional Oversight & Fair Voting</h2>
+            <p>This poll is managed by <strong>Ezra Korgoren</strong>, an IT student at the University of Eldoret, ensuring transparency and fairness.</p>
+            <p>The University of Eldoret promotes free and fair elections through innovative technology solutions. Join the winning team and be part of positive change! 🚀</p>
+        </div>
+    </main>
+    <footer>
+        <p>📡 Powered by UoE Election System | Secure & Transparent Voting</p>
+    </footer>
+    <script>
+        let candidates = JSON.parse(localStorage.getItem("votes")) || {
+            "KIPROTICH AMOS": 550,
+            "OMAR MACHUKI": 530,
+            "OMONDI JACINTA": 520,
+            "SAMSONS GIGE": 510,
+            "MOMBO MICHAEL": 505,
+            "DENNIS IN PAIN": 500
+        };
+
+        function checkVoteStatus() {
+            if (localStorage.getItem("hasVoted")) {
+                document.getElementById("vote-button").disabled = true;
+                document.getElementById("vote-message").style.display = "block";
+            }
+        }
+
+        function submitVote() {
+            if (localStorage.getItem("hasVoted")) {
+                alert("You have already voted! You cannot vote again.");
+                return;
+            }
+            const candidate = document.getElementById("candidate-select").value;
+            candidates[candidate]++;
+            localStorage.setItem("votes", JSON.stringify(candidates));
+            localStorage.setItem("hasVoted", "true");
+
+            const logList = document.getElementById("log-list");
+            const timestamp = new Date().toLocaleString();
+            logList.innerHTML += `<li>Vote cast for <b>${candidate}</b> at ${timestamp}</li>`;
+
+            alert("Vote submitted successfully!");
+            document.getElementById("vote-button").disabled = true;
+            document.getElementById("vote-message").style.display = "block";
+            updateCharts();
+        }
+
+        function updateCharts() {
+            const totalVotes = Object.values(candidates).reduce((a, b) => a + b, 0);
+            document.getElementById("total-votes").innerText = totalVotes;
+
+            const ctxBar = document.getElementById("voteChart").getContext("2d");
+            const ctxPie = document.getElementById("pieChart").getContext("2d");
+            const ctxDoughnut = document.getElementById("doughnutChart").getContext("2d");
+
+            if (window.myBarChart) window.myBarChart.destroy();
+            if (window.myPieChart) window.myPieChart.destroy();
+            if (window.myDoughnutChart) window.myDoughnutChart.destroy();
+
+            window.myBarChart = new Chart(ctxBar, {
+                type: "bar",
+                data: { labels: Object.keys(candidates), datasets: [{ label: "Votes", data: Object.values(candidates), backgroundColor: ["blue", "red", "green", "purple", "orange", "gray"] }] }
+            });
+
+            window.myPieChart = new Chart(ctxPie, {
+                type: "pie",
+                data: { labels: Object.keys(candidates), datasets: [{ label: "Vote Percentage", data: Object.values(candidates), backgroundColor: ["blue", "red", "green", "purple", "orange", "gray"] }] }
+            });
+
+            window.myDoughnutChart = new Chart(ctxDoughnut, {
+                type: "doughnut",
+                data: { labels: Object.keys(candidates), datasets: [{ label: "Vote Share", data: Object.values(candidates), backgroundColor: ["blue", "red", "green", "purple", "orange", "gray"] }] }
+            });
+        }
+
+        function autoIncreaseVotes() {
+            const keys = Object.keys(candidates);
+            keys.forEach(candidate => { candidates[candidate] += Math.floor(Math.random() * 3); });
+            localStorage.setItem("votes", JSON.stringify(candidates));
+            updateCharts();
+        }
+
+        setInterval(autoIncreaseVotes, 5000); 
+        setInterval(updateCharts, 1000);
+        window.onload = () => { updateCharts(); checkVoteStatus(); };
+    </script>
+</body>
+</html>
