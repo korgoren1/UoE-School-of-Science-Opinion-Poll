@@ -42,7 +42,7 @@
             <p id="vote-message" style="color: red; display: none;">You have already voted! You cannot vote again.</p>
         </div>
         <div class="results-section">
-            <h2>Live Results (Updating Every Second)</h2>
+            <h2>Live Results (Updating Every Two Seconds)</h2>
             <h3>Total Votes: <span id="total-votes">0</span></h3>
             <canvas id="voteChart"></canvas>
             <canvas id="pieChart"></canvas>
@@ -63,7 +63,7 @@
     </footer>
     <script>
         let candidates = JSON.parse(localStorage.getItem("votes")) || {
-            "KIPROTICH AMOS": 550,
+            "KIPROTICH AMOS": 750,
             "OMAR MACHUKI": 530,
             "OMONDI JACINTA": 520,
             "SAMSONS GIGE": 510,
