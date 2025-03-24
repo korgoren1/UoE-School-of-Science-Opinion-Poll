@@ -19,22 +19,27 @@
     </style>
 </head>
 <body>
-    <h1>📊 Live Opinion Poll - School of Science</h1>
-    <p id="timestamp"></p>
-
-    <h2>Total Votes: <span id="totalVotes">0</span></h2>
     
-    <h2>Cast Your Vote</h2>
-    <div id="voteButtons">
-        <button class="vote-button" onclick="castVote('Kiprotich Amos')">Vote Kiprotich Amos</button>
-        <button class="vote-button" onclick="castVote('Omar Machuki')">Vote Omar Machuki</button>
-        <button class="vote-button" onclick="castVote('Omondi Jacinta')">Vote Omondi Jacinta</button>
-        <button class="vote-button" onclick="castVote('Samsons Ngige')">Vote Samsons Ngige</button>
-        <button class="vote-button" onclick="castVote('Mombo Michael')">Vote Mombo Michael</button>
-        <button class="vote-button" onclick="castVote('Dennis In Pain')">Vote Dennis In Pain</button>
-        <button class="vote-button" onclick="castVote('Joyce Wanjiku')">Vote Joyce Wanjiku</button>
-    </div>
-
+    <header>
+        <h1>UoE School of Science Opinion Poll</h1>
+        <p>Vote for your preferred candidate! 🗳️</p>
+        <div class="leader-banner"><strong>🔥 Kiprotich Amos leads by 5%! 🔥</strong></div>
+        <div class="mobilization-message">🏆 **Support Amos Kiprotich!** 🏆<br> Cast your vote now and join the winning team on **March 28**! 🎉</div>
+    </header>
+    <main>
+        <div class="vote-section">
+            <h2>Cast Your Vote</h2>
+            <select id="candidate-select">
+                <option value="KIPROTICH AMOS">KIPROTICH AMOS</option>
+                <option value="OMAR MACHUKI">OMAR MACHUKI</option>
+                <option value="OMONDI JACINTA">OMONDI JACINTA</option>
+                <option value="SAMSONS GIGE">SAMSONS GIGE</option>
+                <option value="MOMBO MICHAEL">MOMBO MICHAEL</option>
+                <option value="DENNIS IN PAIN">DENNIS IN PAIN</option>
+            </select>
+            <button id="vote-button" onclick="submitVote()">Vote</button>
+            <p id="vote-message" style="color: red; display: none;">You have already voted! You cannot vote again.</p>
+        </div>
     <h2>Current Poll Standings</h2>
     <div class="chart-container"><canvas id="barChart"></canvas></div>
     <br>
@@ -74,20 +79,33 @@
             updateCharts();
         }
 
-        function logVote(candidate) {
-            let logEntry = document.createElement("p");
-            logEntry.innerText = `${new Date().toLocaleTimeString()} - Vote cast for ${candidate}`;
-            document.getElementById("server-logs").appendChild(logEntry);
+        function checkVoteStatus() {
+            if (localStorage.getItem("hasVoted")) {
+                document.getElementById("vote-button").disabled = true;
+                document.getElementById("vote-message").style.display = "block";
+            }
         }
 
-        function updateVotesAutomatically() {
-            let keys = Object.keys(votes);
-            let randomIndex = Math.floor(Math.random() * keys.length);
-            let randomCandidate = keys[randomIndex];
-            
-            votes[randomCandidate] += Math.floor(Math.random() * 5) + 1;
-            logVote("Automatic vote update");
+        function submitVote() {
+            if (localStorage.getItem("hasVoted")) {
+                alert("You have already voted! You cannot vote again.");
+                return;
+            }
+            const candidate = document.getElementById("candidate-select").value;
+            candidates[candidate]++;
+            localStorage.setItem("votes", JSON.stringify(candidates));
+            localStorage.setItem("hasVoted", "true");
+
+            const logList = document.getElementById("log-list");
+            const timestamp = new Date().toLocaleString();
+            logList.innerHTML += `<li>Vote cast for <b>${candidate}</b> at ${timestamp}</li>`;
+
+            alert("Vote submitted successfully!");
+            document.getElementById("vote-button").disabled = true;
+            document.getElementById("vote-message").style.display = "block";
             updateCharts();
+        }
+
         }
 
         function updateCharts() {
