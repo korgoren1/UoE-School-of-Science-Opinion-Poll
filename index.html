@@ -1,102 +1,39 @@
- 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UoE Opinion Poll</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Live Opinion Poll - School of Science</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></></script>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f4; margin: 0; padding: 0; }
-        header { background-color: #007bff; color: white; padding: 20px; }
-        .leader-banner { background-color: #ffcc00; padding: 10px; font-size: 18px; margin-top: 10px; }
-        .mobilization-message { background-color: #ff5733; color: white; padding: 10px; font-size: 16px; margin-top: 10px; }
-        .vote-section { margin: 20px; }
-        button { background-color: #28a745; color: white; padding: 10px; border: none; cursor: pointer; margin-top: 10px; }
-        button:disabled { background-color: gray; cursor: not-allowed; }
-        .results-section, .server-log { margin-top: 30px; }
-        .oversight-section { background-color: #e0e0e0; padding: 20px; margin-top: 20px; }
-        canvas { width: 80% !important; max-width: 600px; }
-        footer { background-color: #222; color: white; padding: 10px; margin-top: 20px; }
+        body { font-family: Arial, sans-serif; text-align: center; margin: 20px; background-color: #e6f7ff; }
+        .chart-container { width: 90%; max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px; }
+        #timestamp { font-weight: bold; color: green; }
+        .vote-button { padding: 10px; margin: 5px; font-size: 16px; cursor: pointer; }
+        #server-logs { max-height: 250px; overflow-y: auto; border: 1px solid black; padding: 10px; text-align: left; background: white; }
+        .oversight-panel { background: #2c3e50; color: white; padding: 15px; border-radius: 8px; margin-top: 20px; }
+        footer { margin-top: 20px; padding: 10px; background: #333; color: white; text-align: center; }
+        @media (max-width: 600px) {
+            .chart-container { width: 100%; }
+        }
     </style>
 </head>
 <body>
-    <header>
-        <h1>UoE School of Science Opinion Poll</h1>
-        <p>Vote for your preferred candidate! 🗳️</p>
-        <div class="leader-banner"><strong>🔥 Kiprotich Amos leads by 5%! 🔥</strong></div>
-        <div class="mobilization-message">🏆 **Support Amos Kiprotich!** 🏆<br> Cast your vote now and join the winning team on **March 28**! 🎉</div>
-    </header>
-    <main>
-        <div class="vote-section">
-            <h2>Cast Your Vote</h2>
-            <select id="candidate-select">
-                <option value="KIPROTICH AMOS">KIPROTICH AMOS</option>
-                <option value="OMAR MACHUKI">OMAR MACHUKI</option>
-                <option value="OMONDI JACINTA">OMONDI JACINTA</option>
-                <option value="SAMSONS GIGE">SAMSONS GIGE</option>
-                <option value="MOMBO MICHAEL">MOMBO MICHAEL</option>
-                <option value="DENNIS IN PAIN">DENNIS IN PAIN</option>
-            </select>
-            <button id="vote-button" onclick="submitVote()">Vote</button>
-            <p id="vote-message" style="color: red; display: none;">You have already voted! You cannot vote again.</p>
-        </div>
-        <div class="results-section">
-            <h2>Live Results (Updating Every Two Seconds)</h2>
-            <h3>Total Votes: <span id="total-votes">2</span></h3>
-            <canvas id="voteChart"></canvas>
-            <canvas id="pieChart"></canvas>
-            <canvas id="doughnutChart"></canvas>
-        </div>
-        <div class="server-log">
-            <h2>📜 Professional Server Logs</h2>
-            <ul id="log-list"></ul>
-        </div>
-        <div class="oversight-section">
-            <h2>🔍 Professional Oversight & Fair Voting</h2>
-            <p>This poll is managed by <strong>Ezra Korgoren</strong>, an IT student at the University of Eldoret, ensuring transparency and fairness.</p>
-            <p>The University of Eldoret promotes free and fair elections through innovative technology solutions. Join the winning team and be part of positive change! 🚀</p>
-        </div>
-    </main>
-    <footer>
-        <p>📡 Powered by UoE Election System | Secure & Transparent Voting</p>
-    </footer>
-    <script>
-        let candidates = JSON.parse(localStorage.getItem("votes")) || {
-            "KIPROTICH AMOS": 650,
-            "OMAR MACHUKI": 530,
-            "OMONDI JACINTA": 520,
-            "SAMSONS GIGE": 510,
-            "MOMBO MICHAEL": 505,
-            "DENNIS IN PAIN": 500
-        };
+    <h1>📊 Live Opinion Poll - School of Science</h1>
+    <p id="timestamp"></p>
 
-        function checkVoteStatus() {
-            if (localStorage.getItem("hasVoted")) {
-                document.getElementById("vote-button").disabled = true;
-                document.getElementById("vote-message").style.display = "block";
-            }
-        }
-
-        function submitVote() {
-            if (localStorage.getItem("hasVoted")) {
-                alert("You have already voted! You cannot vote again.");
-                return;
-            }
-            const candidate = document.getElementById("candidate-select").value;
-            candidates[candidate]++;
-            localStorage.setItem("votes", JSON.stringify(candidates));
-            localStorage.setItem("hasVoted", "true");
-
-            const logList = document.getElementById("log-list");
-            const timestamp = new Date().toLocaleString();
-            logList.innerHTML += `<li>Vote cast for <b>${candidate}</b> at ${timestamp}</li>`;
-
-            alert("Vote submitted successfully!");
-            document.getElementById("vote-button").disabled = true;
-            document.getElementById("vote-message").style.display = "block";
-            updateCharts();
-        }
+    <h2>Total Votes: <span id="totalVotes">0</span></h2>
+    
+    <h2>Cast Your Vote</h2>
+    <div id="voteButtons">
+        <button class="vote-button" onclick="castVote('Kiprotich Amos')">Vote Kiprotich Amos</button>
+        <button class="vote-button" onclick="castVote('Omar Machuki')">Vote Omar Machuki</button>
+        <button class="vote-button" onclick="castVote('Omondi Jacinta')">Vote Omondi Jacinta</button>
+        <button class="vote-button" onclick="castVote('Samsons Ngige')">Vote Samsons Ngige</button>
+        <button class="vote-button" onclick="castVote('Mombo Michael')">Vote Mombo Michael</button>
+        <button class="vote-button" onclick="castVote('Dennis In Pain')">Vote Dennis In Pain</button>
+        <button class="vote-button" onclick="castVote('Joyce Wanjiku')">Vote Joyce Wanjiku</button>
+    </div>
 
     <h2>Current Poll Standings</h2>
     <div class="chart-container"><canvas id="barChart"></canvas></div>
@@ -205,7 +142,6 @@
             },
             options: { responsive: true, maintainAspectRatio: false }
         });
-    
     </script>
 </body>
 </html>
